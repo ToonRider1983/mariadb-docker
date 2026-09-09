@@ -1,0 +1,53 @@
+services:
+
+  mariadb:
+    image: mariadb:lts
+    container_name: mariadb
+    restart: unless-stopped
+
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+    networks:
+      - database_network
+
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+
+    depends_on:
+      - mariadb
+
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      
+      UPLOAD_LIMIT: 750M
+      MAX_EXECUTION_TIME: 5000
+      MEMORY_LIMIT: 1000M
+
+    ports:
+      - "8080:80"
+
+    networks:
+      - database_network
+
+
+volumes:
+  mariadb_data:
+
+
+networks:
+  database_network:
+    driver: bridge
